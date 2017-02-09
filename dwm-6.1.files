@@ -1,0 +1,7 @@
+config.def.h
+drw.c
+drw.h
+dwm.c
+transient.c
+util.c
+util.h
