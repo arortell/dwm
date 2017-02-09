@@ -765,6 +765,7 @@ dirtomon(int dir)
 void
 drawbar(Monitor *monitor)
 {
+<<<<<<< HEAD
     int x, xx, width, dx;
 	unsigned int i, occ = 0, urg = 0;
     Client *client;
@@ -774,11 +775,21 @@ drawbar(Monitor *monitor)
 
     for (client = monitor->clients; client; client = client->next)
     {
+=======
+	int x, xx, w, dx;
+	unsigned int i, occ = 0, urg = 0;
+    Client *client;
+
+	dx = (drw->fonts[0]->ascent + drw->fonts[0]->descent + 2) / 4;
+
+    for (client = monitor->clients; client; client = client->next) {
+>>>>>>> e50013b36b0071062ae3ae6344b17680ed2d1095
         occ |= client->tags;
         if (client->isurgent)
             urg |= client->tags;
 	}
 	x = 0;
+<<<<<<< HEAD
     for (i = 0; i < LENGTH(tags); i++)
     {
         width = TEXTW(tags[i]);
@@ -818,6 +829,41 @@ drawbar(Monitor *monitor)
 		} else {
 			drw_setscheme(drw, &scheme[SchemeNorm]);
             drw_rect(drw, x, 0, width, bh, 1, 0, 1);
+=======
+	for (i = 0; i < LENGTH(tags); i++) {
+		w = TEXTW(tags[i]);
+        drw_setscheme(drw, monitor->tagset[monitor->seltags] & 1 << i ? &scheme[SchemeSel] : &scheme[SchemeNorm]);
+		drw_text(drw, x, 0, w, bh, tags[i], urg & 1 << i);
+        drw_rect(drw, x + 1, 1, dx, dx, monitor == selected_monitor && selected_monitor->selected_client && selected_monitor->selected_client->tags & 1 << i,
+		           occ & 1 << i, urg & 1 << i);
+		x += w;
+	}
+    w = blw = TEXTW(monitor->ltsymbol);
+	drw_setscheme(drw, &scheme[SchemeNorm]);
+    drw_text(drw, x, 0, w, bh, monitor->ltsymbol, 0);
+	x += w;
+	xx = x;
+    if (monitor == selected_monitor)
+    { /* status is only drawn on selected monitor */
+		w = TEXTW(stext);
+        x = monitor->window_width - w;
+		if (x < xx) {
+			x = xx;
+            w = monitor->window_width - xx;
+		}
+		drw_text(drw, x, 0, w, bh, stext, 0);
+	} else
+        x = monitor->window_width;
+	if ((w = x - xx) > bh) {
+		x = xx;
+        if (monitor->selected_client) {
+            drw_setscheme(drw, monitor == selected_monitor ? &scheme[SchemeSel] : &scheme[SchemeNorm]);
+            drw_text(drw, x, 0, w, bh, monitor->selected_client->name, 0);
+            drw_rect(drw, x + 1, 1, dx, dx, monitor->selected_client->isfixed, monitor->selected_client->isfloating, 0);
+		} else {
+			drw_setscheme(drw, &scheme[SchemeNorm]);
+			drw_rect(drw, x, 0, w, bh, 1, 0, 1);
+>>>>>>> e50013b36b0071062ae3ae6344b17680ed2d1095
 		}
 	}
     drw_map(drw, monitor->barwin, 0, 0, monitor->window_width, bh);
