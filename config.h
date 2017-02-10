@@ -8,13 +8,16 @@
 static const char *fonts[] = {
 	"monospace:size=10"
 };
+
+//clean these up along with passcmd
+//static const char normbordercolor[] = "#4000FF";
+//static const char normbgcolor[]     = "#222222";
+//static const char normfgcolor[]     = "#bbbbbb";
+//static const char selbordercolor[]  = "#00BFFF";
+//static const char selbgcolor[]      = "#005577";
+//static const char selfgcolor[]      = "#eeeeee";
+
 static const char dmenufont[]       = "monospace:size=10";
-static const char normbordercolor[] = "#4000FF";
-static const char normbgcolor[]     = "#222222";
-static const char normfgcolor[]     = "#bbbbbb";
-static const char selbordercolor[]  = "#00BFFF";
-static const char selbgcolor[]      = "#005577";
-static const char selfgcolor[]      = "#eeeeee";
 static const unsigned int borderpx  = 1;        /* border pixel of windows */
 static const unsigned int snap      = 32;       /* snap pixel */
 static const int showbar            = 1;        /* 0 means no bar */
@@ -51,37 +54,61 @@ static const Layout layouts[] = {
 /* key definitions */
 #define MODKEY Mod4Mask
 #define ALTKEY Mod1Mask
+#define NUMCOLORS  4
+
 #define TAGKEYS(KEY,TAG) \
 	{ MODKEY,                       KEY,      view,           {.ui = 1 << TAG} }, \
 	{ MODKEY|ControlMask,           KEY,      toggleview,     {.ui = 1 << TAG} }, \
 	{ MODKEY|ShiftMask,             KEY,      tag,            {.ui = 1 << TAG} }, \
 	{ MODKEY|ControlMask|ShiftMask, KEY,      toggletag,      {.ui = 1 << TAG} },
 
+#define STACKKEYS(MOD,ACTION) \
+    { MOD, XK_j,     ACTION##stack, {.i = INC(+1) } }, \
+    { MOD, XK_k,     ACTION##stack, {.i = INC(-1) } }, \
+    { MOD, XK_grave, ACTION##stack, {.i = PREVSEL } }, \
+    { MOD, XK_Left,  ACTION##stack, {.i = 0 } }, \
+    { MOD, XK_Up,    ACTION##stack, {.i = 1 } }, \
+    { MOD, XK_Down,  ACTION##stack, {.i = 2 } }, \
+    { MOD, XK_Right, ACTION##stack, {.i = -1 } },
+
 /* helper for spawning shell commands in the pre dwm-5.0 fashion */
 #define SHCMD(cmd) { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
 
+static const char colors[NUMCOLORS][MAXCOLORS][8] = {
+  // border   foreground background
+  { "#4000FF", "#dddddd", "#222222" },  // normal
+  { "#00BFFF", "#ffffff", "#000088" },  // selected
+  { "#ff0000", "#000000", "#ffff00" },  // urgent/warning  (black on yellow)
+  { "#ff0000", "#ffffff", "#ff0000" },  // error (white on red)
+  // add more here
+};
+
 /* commands */
 static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
-static const char *dmenucmd[]   = { "dmenu_extended_run", NULL };
-static const char *passcmd[]    = { "passmenu", "-i", "-fn", dmenufont, "-nb", normbgcolor, "-nf", normfgcolor, "-sb", selbgcolor, "-sf", selfgcolor, NULL };
-static const char *termcmd[]    = { "urxvtc", NULL };
-static const char *downvolcmd[] = { "amixer", "-q", "set", "Master", "2-", NULL };
-static const char *upvolcmd[]   = { "amixer", "-q", "set", "Master", "2+", NULL };
-static const char *mutevolcmd[] = { "amixer", "-q", "set", "Master", "toggle", NULL };
-static const char *lockcmd[]    = { "slock", NULL };
-static const char *browsercmd[] = { "qutebrowser", NULL };
+static const char *dmenucmd[]     = { "dmenu_extended_run", NULL };
+static const char *passcmd[]      = { "passmenu", NULL };
+static const char *termcmd[]      = { "urxvtc", NULL };
+static const char *downvolcmd[]   = { "amixer", "-q", "set", "Master", "2-", NULL };
+static const char *upvolcmd[]     = { "amixer", "-q", "set", "Master", "2+", NULL };
+static const char *mutevolcmd[]   = { "amixer", "-q", "set", "Master", "toggle", NULL };
+static const char *lockcmd[]      = { "slock", NULL };
+static const char *browsercmd[]   = { "qutebrowser", NULL };
+static const char *torbrowcmd[]   = { "tor-browser", NULL };
+static const char *qtcreatorcmd[] = { "qtcreator",  NULL };
 
 
 static Key keys[] = {
     /* modifier                     key        function        argument */
-    { MODKEY,                       XK_p,      spawn,          {.v = dmenucmd } },
-    { MODKEY|ShiftMask,             XK_p,      spawn,          {.v = passcmd } },
+    { MODKEY,                       XK_d,      spawn,          {.v = dmenucmd } },
+    { MODKEY,			            XK_p,      spawn,          {.v = passcmd } },
     { MODKEY|ShiftMask,             XK_Return, spawn,          {.v = termcmd } },
     { MODKEY,                       XK_q,      spawn,          {.v = browsercmd } },
+    { MODKEY|ShiftMask,             XK_t,      spawn,          {.v = torbrowcmd } },
     { ALTKEY|ControlMask,           XK_l,      spawn,          {.v = lockcmd } },
+    { MODKEY,                       XK_i,      spawn,          {.v = qtcreatorcmd } },
     { MODKEY|ShiftMask,             XK_b,      togglebar,      {0} },
-    { MODKEY,                       XK_Left,   focusstack,     {.i = +1 } },
-    { MODKEY,                       XK_Right,  focusstack,     {.i = -1 } },
+    STACKKEYS(MODKEY,                          focus)
+    STACKKEYS(MODKEY|ShiftMask,                push)
     { MODKEY,                       XK_plus,   setmfact,       {.f = -0.05} },
     { MODKEY,                       XK_minus,  setmfact,       {.f = +0.05} },
     { MODKEY,                       XK_Return, zoom,           {0} },
